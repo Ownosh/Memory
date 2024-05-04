@@ -78,30 +78,33 @@ class MainMenu:
 class Memory:
     def __init__(self, number=15):
         self.root = Tk()
-        self.root.geometry("900x600")
         self.root.title("Одиночная игра")
+        bg = PhotoImage(file="img/bg1prob.png")
+        self.label10 = Label(self.root, image=bg)
+        self.label10.place(x=0, y =0)
         self.my_frame = Frame(self.root)
-        self.my_frame.pack()
-        center_window(self.root, 900,600)
+        self.my_frame.pack(anchor = NW)
+        center_window(self.root, 1100,620)
         self.matches = [x for x in range(number) for _ in range(2)]
         shuffle(self.matches)
 
         self.chances = 35
+
+
         self.won = False
         self.cols = 0
         self.answer_list = []
         self.NUMBER = number
 
         self.label = Label(self.root, text=f"{self.chances}", font=("Helvetica", 30))
-        self.label.pack()
+        self.label.pack(anchor=NW)
 
         self.reset_game()
-
         self.cols = self.find_rows_cols(len(self.matches))[1]
 
         self.tiles = []
         for i in range(len(self.matches)):
-            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,
+            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,fg='#B2DFDB', bd=4,
                                      command=lambda i=i: self.onclick(i)))
 
         for i, tile in enumerate(self.tiles):
@@ -167,7 +170,7 @@ class Memory:
 
         self.tiles = []
         for i in range(len(self.matches)):
-            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,
+            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,fg='#B2DFDB', bd=4,
                                      command=lambda i=i: self.onclick(i)))
 
         for i, tile in enumerate(self.tiles):
