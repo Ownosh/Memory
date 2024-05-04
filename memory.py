@@ -1,72 +1,48 @@
 from tkinter import *
 from random import shuffle
+from tkinter import messagebox
+from math import sqrt
 
 NUMBER = 15
-class MemoryGame:
+
+
+def center_window(window, width, height):
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
+
+
+class MainMenu:
     def __init__(self):
-        self.window = None  # Initialize the window attribute
+        self.window = None
         self.root = Tk()
+        self.canvas = Canvas(self.root, width=900, height=500, highlightthickness=0)
+        self.canvas.pack()
         self.root.title("Запомни одинаковые")
         self.root.geometry("900x500")
-        self.ROW = 7
-        self.COLUMNS = 7
-        self.files = ['red.png', 'yellow.png', 'gold.png',
-                      'green.png', 'emerald.png', 'cyan.png',
-                      'blue.png', 'pink.png', 'azure.png',
-                      'bronze.png', 'purple.png', 'scarlet.png',
-                      'steel.png', 'silver.png'] * 2
-        shuffle(self.files)
-        self.Buttons = []
-        self.img = []
 
-    def return_to_main_menu(self):
-        self.window.destroy()
-        self.main_menu()
+    def multiplayer(self):
+        pass
 
-    def center_window(self, window, width, height):
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-        window.geometry(f"{width}x{height}+{x}+{y}")
+
 
     def start_game(self):
-        self.root.destroy()  # Hide the main window
-        self.window = Tk()
-        self.window.title("Игра")
-        self.center_window(self.window, 900, 500)
-
-        img3 = PhotoImage(file="img/Frame 4.png")  # Update the file path if needed
-        background_label = Label(self.window, image=img3)
-        background_label.place(x=0, y=0, relwidth=1, relheight=1)
-
-        for i in range(self.ROW):
-            temp = []
-            for j in range(self.COLUMNS):
-                btn = Button(self.window, width=7, height=3)
-                temp.append(btn)
-                btn.grid(row=i, column=j)  # Place the button directly on the window
-            self.Buttons.append(temp)
-
-        for i in range(self.ROW):
-            for j in range(self.COLUMNS):
-                btn = self.Buttons[i][j]
-                btn.grid(row=i, column=j, padx=3, pady=3)
-
-        self.window.mainloop()
+        self.root.destroy()
+        self.memory = Memory()
+        self.memory.root.mainloop()
 
     def show_rules(self):
-        self.root.destroy()  # Destroy the previous root window
-        tk = Tk()  # Create a new Tkinter root window
-        tk.title("Правила")
-        self.center_window(tk, 900, 500)
-        canvas2 = Canvas(tk, width=900, height=500, highlightthickness=0)
-        canvas2.pack()
-        img3 = PhotoImage(file="img/rin_rules.png")  # Load the image for the canvas
-        canvas2.create_image(0, 0, anchor=NW, image=img3)  # Display the image on the canvas
-        back_button = Button(canvas2, text="Назад", command=lambda: self.main_menu())
-        back_button_window = canvas2.create_window(800, 10, anchor=NW, window=back_button)
-        tk.mainloop()
+
+        self.root.title("Правила")
+        self.canvas.delete('all')
+        img3 = PhotoImage(file="img/rin_rules.png")
+        self.canvas.create_image(0, 0, anchor=NW, image=img3)
+        back_button = Button(self.canvas, text="Назад", command=self.main_menu)
+        self.canvas.create_window(800, 10, anchor=NW, window=back_button)
+        self.canvas.pack()
+        self.root.mainloop()
 
     def exit_game(self):
         self.root.destroy()
@@ -78,23 +54,142 @@ class MemoryGame:
         screen_height = self.root.winfo_screenheight()
         x = (screen_width / 2) - (width / 2)
         y = (screen_height / 2) - (height / 2)
+        self.canvas.delete('all')
         self.root.geometry('%dx%d+%d+%d' % (width, height, x, y))
-        canvas = Canvas(self.root, width=900, height=500, highlightthickness=0)
-        canvas.pack()
+        self.root.title("Запомни одинаковые")
         img_obj3 = PhotoImage(file="img/dio.png")
-        canvas.create_image(0, 0, anchor=NW, image=img_obj3)
+        self.canvas.create_image(0, 0, anchor=NW, image=img_obj3)
         play_button = Button(self.root, text="Играть", fg="Black", font=('times new roman', 15), bg='#CE5480', width=18,
                              height=1, command=self.start_game)
-        play_button_window = canvas.create_window(345, 210, anchor=NW, window=play_button)
+        self.canvas.create_window(345, 210, anchor=NW, window=play_button)
         rules_button = Button(self.root, text="Правила", fg="Black", font=('times new roman', 15), bg='#CE5480',
                               width=18,
                               height=1, command=self.show_rules)
-        rules_button_window = canvas.create_window(345, 300, anchor=NW, window=rules_button)
+        self.canvas.create_window(345, 330, anchor=NW, window=rules_button)
+        multiplayer = Button(self.root, text="2 игрока", fg="Black", font=('times new roman', 15), bg='#CE5480', width=18,
+                             height=1)
+        self.canvas.create_window(345, 270, anchor=NW, window=multiplayer)
         exit_button = Button(self.root, text="Выход", fg="Black", font=('times new roman', 15), bg='#CE5480', width=18,
                              height=1, command=self.exit_game)
-        exit_button_window = canvas.create_window(345, 390, anchor=NW, window=exit_button)
+        self.canvas.create_window(345, 390, anchor=NW, window=exit_button)
         self.root.mainloop()
 
 
-game = MemoryGame()
+class Memory:
+    def __init__(self, number=15):
+        self.root = Tk()
+        self.root.geometry("900x600")
+        self.root.title("Одиночная игра")
+        self.my_frame = Frame(self.root)
+        self.my_frame.pack()
+        center_window(self.root, 900,600)
+        self.matches = [x for x in range(number) for _ in range(2)]
+        shuffle(self.matches)
+
+        self.chances = 35
+        self.won = False
+        self.cols = 0
+        self.answer_list = []
+        self.NUMBER = number
+
+        self.label = Label(self.root, text=f"{self.chances}", font=("Helvetica", 30))
+        self.label.pack()
+
+        self.reset_game()
+
+        self.cols = self.find_rows_cols(len(self.matches))[1]
+
+        self.tiles = []
+        for i in range(len(self.matches)):
+            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,
+                                     command=lambda i=i: self.onclick(i)))
+
+        for i, tile in enumerate(self.tiles):
+            row = i % self.cols
+            col = int(i / self.cols)
+            tile.grid(row=row, column=col)
+
+        self.my_menu = Menu(self.root)
+        self.root.config(menu=self.my_menu)
+
+        option_menu = Menu(self.my_menu, tearoff=False)
+        self.my_menu.add_cascade(label="Options", menu=option_menu)
+        option_menu.add_command(label="Reset Game", command=self.reset_game)
+        option_menu.add_separator()
+        option_menu.add_command(label="Выход", command=self.back)
+
+        self.root.mainloop()
+
+    def onclick(self, index):
+        self.label["text"] = f'{self.chances}'
+
+        if self.tiles[index]["text"] == ' ':
+            self.tiles[index]["text"] = str(self.matches[index])
+            self.tiles[index]['state'] = DISABLED
+            self.answer_list.append(index)
+        else:
+            self.tiles[index]["text"] = ' '
+
+        flag = True
+        if len(self.answer_list) == 2:
+            if self.matches[self.answer_list[0]] == self.matches[self.answer_list[1]] and flag:
+                self.tiles[self.answer_list[0]]["state"] = DISABLED
+                self.tiles[self.answer_list[1]]["state"] = DISABLED
+                self.label["text"] = f"ВЕРНО!Попыток: {self.chances}"
+                self.won += 1
+                if self.won == self.NUMBER:
+                    self.label["text"] = "ПОБЕДА!"
+            else:
+                self.chances -= 1
+                self.label["text"] = f"Попыток: {self.chances}"
+                messagebox.showinfo("Incorrect", "ОШИБКА")
+                self.tiles[self.answer_list[0]]["state"] = NORMAL
+                self.tiles[self.answer_list[1]]["state"] = NORMAL
+                self.tiles[self.answer_list[0]]["text"] = ' '
+                self.tiles[self.answer_list[1]]["text"] = ' '
+
+            self.answer_list = []
+
+        if self.chances == 0:
+            for tile in self.tiles:
+                tile["state"] = DISABLED
+            self.label["text"] = "ИГРА ПРОИГРАНА"
+
+    def reset_game(self):
+        self.answer_list = []
+        self.chances = 35
+        self.won = False
+        shuffle(self.matches)
+
+        self.label["text"] = ' '
+
+        self.cols = self.find_rows_cols(len(self.matches))[1]
+
+        self.tiles = []
+        for i in range(len(self.matches)):
+            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,
+                                     command=lambda i=i: self.onclick(i)))
+
+        for i, tile in enumerate(self.tiles):
+            row = i % self.cols
+            col = int(i / self.cols)
+            tile.grid(row=row, column=col)
+
+    def back(self):
+        self.root.destroy()
+
+
+
+    def find_rows_cols(self, number):
+        max_cols = int(sqrt(number))
+        cols = int()
+        for i in range(max_cols, 0, -1):
+            if number % i == 0:
+                cols = i
+                break
+        rows = int(number / cols)
+        return rows, cols
+
+
+game = MainMenu()
 game.main_menu()
