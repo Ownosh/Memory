@@ -22,11 +22,10 @@ class MainMenu:
         self.canvas.pack()
         self.root.title("Запомни одинаковые")
         self.root.geometry("900x500")
+        self.main_menu()
 
     def multiplayer(self):
         pass
-
-
 
     def start_game(self):
         self.root.destroy()
@@ -116,10 +115,10 @@ class Memory:
         self.root.config(menu=self.my_menu)
 
         option_menu = Menu(self.my_menu, tearoff=False)
-        self.my_menu.add_cascade(label="Options", menu=option_menu)
-        option_menu.add_command(label="Reset Game", command=self.reset_game)
+        self.my_menu.add_cascade(label="Настройки", menu=option_menu)
+        option_menu.add_command(label="Перезапустить", command=self.reset_game)
         option_menu.add_separator()
-        option_menu.add_command(label="Выход", command=self.back)
+        option_menu.add_command(label="Назад", command=self.back)
 
         self.root.mainloop()
 
@@ -180,8 +179,7 @@ class Memory:
 
     def back(self):
         self.root.destroy()
-
-
+        MainMenu()
 
     def find_rows_cols(self, number):
         max_cols = int(sqrt(number))
@@ -194,5 +192,5 @@ class Memory:
         return rows, cols
 
 
-game = MainMenu()
-game.main_menu()
+if __name__ == '__main__':
+    game = MainMenu()
