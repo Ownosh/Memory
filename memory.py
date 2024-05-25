@@ -24,9 +24,6 @@ class MainMenu:
         self.root.geometry("900x500")
         self.main_menu()
 
-    def multiplayer(self):
-        pass
-
     def start_game(self):
         self.root.destroy()
         self.memory = Memory()
@@ -49,6 +46,7 @@ class MainMenu:
     def main_menu(self):
         width = 900
         height = 500
+        self.root.resizable(width=False, height=False)
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         x = (screen_width / 2) - (width / 2)
@@ -64,10 +62,7 @@ class MainMenu:
         rules_button = Button(self.root, text="Правила", fg="Black", font=('times new roman', 15), bg='#CE5480',
                               width=18,
                               height=1, command=self.show_rules)
-        self.canvas.create_window(345, 330, anchor=NW, window=rules_button)
-        multiplayer = Button(self.root, text="2 игрока", fg="Black", font=('times new roman', 15), bg='#CE5480', width=18,
-                             height=1)
-        self.canvas.create_window(345, 270, anchor=NW, window=multiplayer)
+        self.canvas.create_window(345, 300, anchor=NW, window=rules_button)
         exit_button = Button(self.root, text="Выход", fg="Black", font=('times new roman', 15), bg='#CE5480', width=18,
                              height=1, command=self.exit_game)
         self.canvas.create_window(345, 390, anchor=NW, window=exit_button)
@@ -80,22 +75,21 @@ class Memory:
         self.root.title("Одиночная игра")
         bg = PhotoImage(file="img/bg1prob.png")
         self.label10 = Label(self.root, image=bg)
-        self.label10.place(x=0, y =0)
+        self.label10.place(x=0, y=0)
         self.my_frame = Frame(self.root)
-        self.my_frame.pack(anchor = NW)
-        center_window(self.root, 1100,620)
+        self.my_frame.pack(anchor=NW)
+        center_window(self.root, 1100, 620)
         self.matches = [x for x in range(number) for _ in range(2)]
         shuffle(self.matches)
+        self.root.resizable(width=False, height=False)
 
         self.chances = 35
-
-
         self.won = False
         self.cols = 0
         self.answer_list = []
         self.NUMBER = number
 
-        self.label = Label(self.root, text=f"{self.chances}", font=("Helvetica", 30))
+        self.label = Label(self.root, text=f"Попыток: {self.chances}", font=("Times New Roman", 40), bg='#5F74A4', fg='white')
         self.label.pack(anchor=NW)
 
         self.reset_game()
@@ -103,7 +97,7 @@ class Memory:
 
         self.tiles = []
         for i in range(len(self.matches)):
-            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,fg='#B2DFDB', bd=4,
+            self.tiles.append(Button(self.my_frame, text=' ', font=("Times New Roman", 40), height=1, width=3,bg='white', bd=-1,
                                      command=lambda i=i: self.onclick(i)))
 
         for i, tile in enumerate(self.tiles):
@@ -123,7 +117,7 @@ class Memory:
         self.root.mainloop()
 
     def onclick(self, index):
-        self.label["text"] = f'{self.chances}'
+        self.label["text"] = f'Попыток: {self.chances}'
 
         if self.tiles[index]["text"] == ' ':
             self.tiles[index]["text"] = str(self.matches[index])
@@ -145,6 +139,7 @@ class Memory:
                 self.chances -= 1
                 self.label["text"] = f"Попыток: {self.chances}"
                 messagebox.showinfo("Incorrect", "ОШИБКА")
+
                 self.tiles[self.answer_list[0]]["state"] = NORMAL
                 self.tiles[self.answer_list[1]]["state"] = NORMAL
                 self.tiles[self.answer_list[0]]["text"] = ' '
@@ -169,7 +164,7 @@ class Memory:
 
         self.tiles = []
         for i in range(len(self.matches)):
-            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3,fg='#B2DFDB', bd=4,
+            self.tiles.append(Button(self.my_frame, text=' ', font=("Helvetica", 40), height=1, width=3, fg='#B2DFDB', bd=4,
                                      command=lambda i=i: self.onclick(i)))
 
         for i, tile in enumerate(self.tiles):
