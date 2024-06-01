@@ -104,6 +104,7 @@ class Memory:
             row = i % self.cols
             col = int(i / self.cols)
             tile.grid(row=row, column=col)
+        self.show_elements()
 
         self.my_menu = Menu(self.root)
         self.root.config(menu=self.my_menu)
@@ -113,8 +114,16 @@ class Memory:
         option_menu.add_command(label="Перезапустить", command=self.reset_game)
         option_menu.add_separator()
         option_menu.add_command(label="Назад", command=self.back)
-
         self.root.mainloop()
+
+    def show_elements(self):
+        for i, tile in enumerate(self.tiles):
+            tile.config(text=str(self.matches[i]))
+        self.root.after(5000, self.hide_elements)
+
+    def hide_elements(self):
+        for tile in self.tiles:
+            tile.config(text=' ')
 
     def onclick(self, index):
         self.label["text"] = f'Попыток: {self.chances}'
