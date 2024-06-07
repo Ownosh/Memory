@@ -1,11 +1,7 @@
 from tkinter import *
 from random import shuffle
-from tkinter import messagebox
 from math import sqrt
-import time
-
-NUMBER = 15
-Range = 2
+import os
 
 
 def center_window(window, width, height):
@@ -28,14 +24,12 @@ class MainMenu:
 
     def start_game(self):
         self.root.destroy()
-        self.memory = Memory()
-        self.memory.root.mainloop()
+        Memory()
 
     def show_rules(self):
-
         self.root.title("Правила")
         self.canvas.delete('all')
-        img3 = PhotoImage(file="img/rin_rules.png")
+        img3 = PhotoImage(file="img_rules/rin_rules.png")
         self.canvas.create_image(0, 0, anchor=NW, image=img3)
         back_button = Button(self.canvas, text="Назад", command=self.main_menu)
         self.canvas.create_window(800, 10, anchor=NW, window=back_button)
@@ -75,28 +69,32 @@ class Memory:
     def __init__(self, number=8):
         self.root = Tk()
         self.root.title("Одиночная игра")
-        bg = PhotoImage(file="img/bg1prob.png")
-        self.label10 = Label(self.root, image=bg)
-        self.advanced_selected = False
-        self.advanced_selected2 = False
+        self.bg = PhotoImage(file="img/bg1prob.png")
+        self.label10 = Label(self.root, image=self.bg)
         self.label10.place(x=-5, y=0)
+
+        self.advanced_selected = [False, False, False]
         self.my_frame = Frame(self.root)
         self.my_frame.pack(anchor=NW)
         center_window(self.root, 1090, 630)
         self.root.resizable(width=False, height=False)
+
         self.chances = 10
-        self.won = False
-        self.cols = 0
-        self.answer_list = []
-        self.NUMBER = number
         self.points = 0
+        self.NUMBER = number
         self.increasePoints = 10
+        self.won = False
 
-        self.label = Label(self.root, text=f"Попыток: {self.chances}, Очков: {self.points}", font=("Times New Roman", 40), bg='#5F74A4', fg='white')
-        self.label.pack(anchor=NW)
+        self.label = Label(self.root, text="", font=("Times New Roman", 40), bg='#5F74A4', fg='white')
+        self.label.pack()
+        self.answer_list = []
 
-        self.set_easy()
+        self.setup_menu()
+        self.setup_buttons()
 
+        self.root.mainloop()
+
+    def setup_menu(self):
         self.my_menu = Menu(self.root)
         self.root.config(menu=self.my_menu)
 
@@ -108,64 +106,69 @@ class Memory:
 
         difficulty_menu = Menu(self.my_menu, tearoff=False)
         self.my_menu.add_cascade(label="Уровень сложности", menu=difficulty_menu)
-        difficulty_menu.add_command(label="Начинающий", command=self.set_easy)
-        difficulty_menu.add_command(label="Продвинутый", command=self.set_medium)
+        difficulty_menu.add_command(label="Начинающий", command=lambda: self.set_difficulty(8, 2, 0, 10))
+        difficulty_menu.add_command(label="Средний", command=lambda: self.set_difficulty(10, 2, 1, 15))
+        difficulty_menu.add_command(label="Продвинутый", command=lambda: self.set_difficulty(15, 2, 2, 20))
 
-        self.root.mainloop()
+    def setup_buttons(self):
+        self.buttons = [
+            Button(self.root, text="Начальный", fg="Black", font=('times new roman', 15), bg='White', width=18,
+                   command=lambda: self.set_difficulty(8, 2, 0, 10)),
+            Button(self.root, text="Средний", fg="Black", font=('times new roman', 15), bg='White', width=18,
+                   command=lambda: self.set_difficulty(10, 2, 1, 15)),
+            Button(self.root, text="Продвинутый", fg="Black", font=('times new roman', 15), bg='White', width=18,
+                   command=lambda: self.set_difficulty(15, 2, 2, 20))
+        ]
+        for button in self.buttons:
+            button.pack(anchor=W, padx=50, pady=10)
 
-    def set_easy(self, number=8, Range=2):
-        self.advanced_selected2 = False
-        if not self.advanced_selected:
-            self.advanced_selected = True
-            self.answer_list = []
-            self.chances = 10  # Установить количество шансов для уровня "начальный"
-            self.matches = [x for x in range(number) for _ in range(Range)]
-            self.won = False
-            shuffle(self.matches)
-            self.label["text"] = ' '
-            self.cols = self.find_rows_cols(len(self.matches))[1]
-            self.tiles = []
-            for item in self.my_frame.winfo_children():
-                item.destroy()
-            for i in range(len(self.matches)):
-                self.tiles.append(
-                    Button(self.my_frame, text=' ', font=("Times New Roman", 40), height=1, width=3, fg='BLACK', bd=4,
-                           command=lambda i=i: self.onclick(i)))
-
-            for i, tile in enumerate(self.tiles):
-                row = i % self.cols
-                col = int(i / self.cols)
-                tile.grid(row=row, column=col)
-            self.show_elements()
+    def set_difficulty(self, number, range_, level, chances):
+        if not self.advanced_selected[level]:
+            self.hide_buttons()
+            self.advanced_selected = [False, False, False]
+            self.advanced_selected[level] = True
+            self.label.pack(anchor=SW)
+            self.reset_game_parameters(number, range_, chances)
+            self.create_tiles()
         else:
-            print("Начальный уровень уже был выбран. Повторный выбор невозможен.")
+            print(
+                f"Уровень сложности '{['Начальный', 'Средний', 'Продвинутый'][level]}' уже был выбран. Повторный выбор невозможен.")
 
 
-    def set_medium(self, number=15, Range=2):
-        self.advanced_selected = False
-        if not self.advanced_selected2:
-            self.advanced_selected2 = True
-            self.answer_list = []
-            self.chances = 20
-            self.matches = [x for x in range(number) for _ in range(Range)]
-            self.won = False
-            shuffle(self.matches)
-            self.label["text"] = ' '
-            self.cols = self.find_rows_cols(len(self.matches))[1]
-            self.tiles = []
-            for i in range(len(self.matches)):
-                self.tiles.append(
-                    Button(self.my_frame, text=' ', font=("Times New Roman", 40), height=1, width=3, fg='BLACK', bd=4,
-                           command=lambda i=i: self.onclick(i)))
+    def hide_buttons(self):
+        for button in self.buttons:
+            button.pack_forget()
 
-            for i, tile in enumerate(self.tiles):
-                row = i % self.cols
-                col = int(i / self.cols)
-                tile.grid(row=row, column=col)
-            self.show_elements()
-        else:
-            print("Продвинутый уровень уже был выбран. Повторный выбор невозможен.")
+    def reset_game_parameters(self, number, range_, chances):
+        self.NUMBER = number
+        self.matches = [x for x in range(number) for _ in range(range_)]
+        shuffle(self.matches)
+        self.reset_game(chances)
 
+    def reset_game(self, chances=10):
+        self.answer_list = []
+        self.chances = chances
+        self.points = 0
+        self.increasePoints = 10
+        self.won = False
+        self.label["text"] = ' '
+        shuffle(self.matches)
+        self.create_tiles()
+        self.change_background_image()
+
+    def create_tiles(self):
+        self.cols = self.find_rows_cols(len(self.matches))[1]
+        for item in self.my_frame.winfo_children():
+            item.destroy()
+        self.tiles = [
+            Button(self.my_frame, text=' ', font=("Times New Roman", 40), height=1, width=3, fg='Grey', bd=4,
+                   command=lambda i=i: self.onclick(i)) for i in range(len(self.matches))
+        ]
+        for i, tile in enumerate(self.tiles):
+            row = i % self.cols
+            col = int(i / self.cols)
+            tile.grid(row=row, column=col)
+        self.show_elements()
 
     def show_elements(self):
         for i, tile in enumerate(self.tiles):
@@ -179,65 +182,58 @@ class Memory:
             tile.config(text=' ')
             tile.config(state='normal')
 
+    def change_background_image(self):
+        # List all image files in the directory
+        image_files = [file for file in os.listdir("img") if file.endswith(".png")]
+
+        # Select a random image file
+        import random
+        selected_image = random.choice(image_files)
+
+        # Update the background image
+        self.bg = PhotoImage(file=f"img/{selected_image}")
+        self.label10.config(image=self.bg)
+
     def onclick(self, index):
         self.label["text"] = f'Попыток: {self.chances}, Очков: {self.points}'
+        tile = self.tiles[index]
 
-        if self.tiles[index]["text"] == ' ':
-            self.tiles[index]["text"] = str(self.matches[index])
-            self.tiles[index]['state'] = DISABLED
+        if tile["text"] == ' ':
+            tile["text"] = str(self.matches[index])
+            tile['state'] = DISABLED
             self.answer_list.append(index)
         else:
-            self.tiles[index]["text"] = ' '
+            tile["text"] = ' '
 
-        flag = True
         if len(self.answer_list) == 2:
-            if self.matches[self.answer_list[0]] == self.matches[self.answer_list[1]] and flag:
-                self.points += self.increasePoints
-                self.increasePoints += 10
-                self.tiles[self.answer_list[0]]["state"] = DISABLED
-                self.tiles[self.answer_list[1]]["state"] = DISABLED
-                self.label["text"] = f"+{self.increasePoints-10} очков!, Стало:{self.points}"
-                self.won += 1
-                if self.won == self.NUMBER:
-                    self.label["text"] = "ПОБЕДА!"
-            else:
-                self.increasePoints = 10
-                self.chances -= 1
-                self.label["text"] = f"Попыток: {self.chances}, Очков: {self.points}"
-                messagebox.showinfo("Incorrect", "ОШИБКА")
+            self.check_match()
 
-                self.tiles[self.answer_list[0]]["state"] = NORMAL
-                self.tiles[self.answer_list[1]]["state"] = NORMAL
-                self.tiles[self.answer_list[0]]["text"] = ' '
-                self.tiles[self.answer_list[1]]["text"] = ' '
+    def check_match(self):
+        first, second = self.answer_list
+        if self.matches[first] == self.matches[second]:
+            self.points += self.increasePoints
+            self.increasePoints += 10
+            self.tiles[first]["state"] = DISABLED
+            self.tiles[second]["state"] = DISABLED
+            self.label["text"] = f"+{self.increasePoints - 10} очков!, Стало:{self.points}"
+            self.won += 1
+            if self.won == self.NUMBER:
+                self.show_victory_window()
+        else:
+            self.increasePoints = 10
+            self.chances -= 1
+            self.label["text"] = f"Попыток: {self.chances}, Очков: {self.points}"
+            self.tiles[first].after(500, lambda: self.tiles[first].config(text=' '))
+            self.tiles[second].after(500, lambda: self.tiles[second].config(text=' '))
+            self.tiles[first]["state"] = NORMAL
+            self.tiles[second]["state"] = NORMAL
 
-            self.answer_list = []
+        self.answer_list = []
 
         if self.chances == 0:
             for tile in self.tiles:
                 tile["state"] = DISABLED
             self.label["text"] = "ИГРА ПРОИГРАНА"
-
-    def reset_game(self, chances=10):
-        self.answer_list = []
-        self.chances = chances
-
-        self.won = False
-        shuffle(self.matches)
-        self.label["text"] = ' '
-        self.cols = self.find_rows_cols(len(self.matches))[1]
-        self.tiles = []
-        for i in range(len(self.matches)):
-            self.tiles.append(Button(self.my_frame, text=' ', font=("Times New Roman", 40), height=1, width=3, fg='BLACK', bd=4,
-                                     command=lambda i=i: self.onclick(i)))
-
-        for i, tile in enumerate(self.tiles):
-            row = i % self.cols
-            col = int(i / self.cols)
-            tile.grid(row=row, column=col)
-        self.show_elements()
-
-
 
     def back(self):
         self.root.destroy()
@@ -245,13 +241,45 @@ class Memory:
 
     def find_rows_cols(self, number):
         max_cols = int(sqrt(number))
-        cols = int()
         for i in range(max_cols, 0, -1):
             if number % i == 0:
                 cols = i
                 break
-        rows = int(number / cols)
+        rows = number // cols
         return rows, cols
+
+    def show_victory_window(self):
+        # Скрываем основное окно
+        self.root.withdraw()
+
+        # Создаем новое окно "victory window"
+        self.victory_window = Toplevel()
+        self.victory_window.title("Победа!")
+        self.victory_window.geometry("900x500")
+
+        # Добавляем фоновое изображение
+        victory_bg = PhotoImage(file="img/bg1prob1.png")
+        victory_bg_label = Label(self.victory_window, image=victory_bg)
+        victory_bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Добавляем кнопки повтора и выхода
+        replay_button = Button(self.victory_window, text="Повторить", command=self.reset_game)
+        replay_button.place(relx=0.5, rely=0.5, anchor="center")
+
+        exit_button = Button(self.victory_window, text="Выйти", command=self.root.destroy)
+        exit_button.place(relx=0.5, rely=0.6, anchor="center")
+
+        # Добавим обработчик закрытия окна победы для восстановления основного окна
+        self.victory_window.protocol("WM_DELETE_WINDOW", self.restore_main_window)
+
+    def restore_main_window(self):
+        # Восстанавливаем основное окно
+        self.root.deiconify()
+
+    def reset_game1(self, chances=10):
+        # Закрываем окно победы, если оно открыто
+        if hasattr(self, 'victory_window') and self.victory_window.winfo_exists():
+            self.victory_window.destroy()
 
 
 if __name__ == '__main__':
